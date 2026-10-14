@@ -1,0 +1,92 @@
+{
+  "parentFolderId": "1ZhICfjc-eYk6afTiovwXiqsNb5E83mi0",
+  "defaultSharingMode": "domain",
+  "workspaceDomain": "procuradoria.rio",
+  "docDefault": {
+    "id": "1INmp3zuJ8mvRcJahmRC8VlIw0kBuILeGhPCYSGySKvY",
+    "titlePrefix": "Minuta"
+  },
+  "documents": [
+    {
+      "id": "160BhUlgQyyjZprxh1jm3MAqjudxRXiQtv20W63D5hbw",
+      "name": "Contestação"
+    },
+    {
+      "id": "1cSsqIwfbdTSa2fk0knwKb08FdBB-snekc-yVlAABtDU",
+      "name": "Mandato"
+    },
+    {
+      "id": "1WsIMs8XUJXl2zNuAMtACHkQC_Hu0r_cZah_m0Z18NIg",
+      "name": "nova minuta 27/01!"
+    },
+    {
+      "id": "1kxiuFBD8QshdM_IiFqGd8qxoIXKo0NEV0QxqMi9JMfM",
+      "name": "Impugnação ao Cumprimento de Sentença"
+    },
+    {
+      "id": "1v1AiEGQN96MfadGJnlPkOTjK-IvAdjP2vpgimHDE8b8",
+      "name": "Contrarrazões"
+    },
+    {
+      "id": "16aDgFxIRrJyfakivUqFzgxBBXrjFhw0bfeiTu5qh0Fo",
+      "name": "Contestação"
+    },
+    {
+      "id": "1P78ljiV67sgK3OuOb7V6FAOgrCGLO4EPZHIj_7wHRXw",
+      "name": "Petição Inicial"
+    },
+    {
+      "id": "1YRgEMmvbmVK1EWw1VKRRBRFWvCQI03qTddE9tQc6OhU",
+      "name": "Agravo de Instrumento"
+    }
+  ],
+  "tokens": {
+    "access_token": "ya29.a0AdMD6Eij6l5tfxNFrfWuyDBPGJnrTdsc1AT93pg0X0ZGqR0TP5iNKMZKKhEmsRcBaS_sOvMsDi82f5DaJC0vSgDlF5HY-FFWZHklqMy1T6tCAy52vNIO3i3TSnQKFmMvdK63-wCuUvffNXEUUuqpZYb-c7Vmo5NZ4haj5LT8fKkzNc0K_vtIkpMm0pBgsrfZ7qE5NWIaCgYKAS0SARYSFQHGX2MiTD4o1TNHEdDfqzUig82ljw0206",
+    "refresh_token": "1//0hCZ0wkHBXETYCgYIARAAGBESNwF-L9Irok9kclfiXVZ4dareMR4Lb2QXm4ptLYAQs1qKwigHyjWdEFb11vP5QFcOsEIMPxXw-Lo",
+    "scope": "https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive",
+    "token_type": "Bearer",
+    "refresh_token_expires_in": 604799,
+    "expiry_date": 1790090196923
+  },
+  "legalVocabulary": [
+    {
+      "id": "numero_processo",
+      "label": "Número do processo judicial",
+      "value": "0001234-56.2024.8.26.0100",
+      "icon": "bi-hash",
+      "description": "Número único CNJ do processo",
+      "copied": false
+    },
+    {
+      "id": "reus",
+      "label": "Réus",
+      "value": "Banco Alpha S.A. e Seguradora Beta Ltda.",
+      "icon": "bi-shield-shaded",
+      "description": "Parte demandada (polo passivo)",
+      "copied": false
+    },
+    {
+      "id": "autores",
+      "label": "Autores",
+      "value": "Carlos Alberto da Silva e Maria Fernandes Silva",
+      "icon": "bi-people-fill",
+      "description": "Parte requerente (polo ativo)"
+    },
+    {
+      "id": "juizo",
+      "label": "Juízo",
+      "value": "4ª Vara Cível do Foro Central da Comarca de São Paulo/SP",
+      "icon": "bi-bank",
+      "description": "Vara e comarca competente",
+      "copied": false
+    },
+    {
+      "id": "valor_causa",
+      "label": "Valor da causa",
+      "value": "R$ 75.000,00 (setenta e cinco mil reais)",
+      "icon": "bi-currency-dollar",
+      "description": "Valor atribuído à causa com extenso",
+      "copied": false
+    }
+  ]
+}

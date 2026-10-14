@@ -1,0 +1,13 @@
+{
+  "name": "google-docs-editor",
+  "version": "1.0.0",
+  "description": "A simple web app to edit Google Docs in an iframe.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "googleapis": "^137.1.0"
+  }
+}

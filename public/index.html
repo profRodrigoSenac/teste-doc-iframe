@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-BR" ng-app="docEditor">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Peças Jurídicas - Google Docs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-main: rgb(104, 117, 135);
+            --primary-dark: rgb(75, 86, 101);
+            --primary-darker: rgb(48, 56, 67);
+            --primary-light: rgb(138, 151, 168);
+            --primary-soft: rgba(104, 117, 135, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f4f7;
+            color: #2c3540;
+        }
+
+        /* Custom Primary Styles */
+        .btn-primary {
+            background-color: var(--primary-main) !important;
+            border-color: var(--primary-main) !important;
+            color: #fff !important;
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            background-color: var(--primary-dark) !important;
+            border-color: var(--primary-dark) !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-main) !important;
+            border-color: var(--primary-main) !important;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-main) !important;
+            color: #fff !important;
+        }
+
+        .text-primary {
+            color: var(--primary-main) !important;
+        }
+
+        .spinner-border.text-primary {
+            color: var(--primary-main) !important;
+        }
+
+        .nav-tabs .nav-link {
+            font-weight: 500;
+            color: #5c6877;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-main);
+            font-weight: 600;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+
+        .nav-tabs .nav-link .close-tab {
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: #a0aec0;
+            transition: color 0.2s;
+        }
+
+        .nav-tabs .nav-link .close-tab:hover {
+            color: #e53e3e;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, rgb(104, 117, 135) 0%, rgb(75, 86, 101) 100%);
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(75, 86, 101, 0.22);
+        }
+
+        .top-bar .form-control::placeholder {
+            color: #d2dbe5;
+            opacity: 0.85;
+        }
+
+        .top-bar .form-control {
+            background-color: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .top-bar .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: none;
+        }
+
+        /* --- Floating Legal Dock & Keywords --- */
+        .floating-dock-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1050;
+        }
+
+        .floating-dock-card {
+            background: rgba(48, 56, 67, 0.97);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(104, 117, 135, 0.4);
+            border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+            width: 360px;
+            max-width: calc(100vw - 40px);
+            color: #fff;
+            padding: 14px 16px;
+            animation: slideUpFade 0.3s ease-out;
+        }
+
+        .floating-dock-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 10px;
+        }
+
+        .floating-dock-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .keywords-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .keyword-item-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .keyword-item-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 9px;
+            padding: 7px 11px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .keyword-item-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .keyword-item-btn.copied-active {
+            background: #198754 !important;
+            border-color: #20c997 !important;
+            color: #fff !important;
+            animation: pulseSuccess 0.4s ease;
+        }
+
+        .kw-label-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kw-action-badge {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- Pure Floating Tooltip (Hover Balloon - Zero Layout Shift) --- */
+        .kw-floating-tooltip {
+            position: absolute;
+            right: calc(100% + 14px);
+            top: 50%;
+            transform: translateY(-50%) scale(0.95);
+            background: rgb(36, 42, 51);
+            border: 1px solid rgba(104, 117, 135, 0.5);
+            border-radius: 10px;
+            padding: 10px 12px;
+            width: 290px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            z-index: 1099;
+        }
+
+        .kw-floating-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -7px;
+            transform: translateY(-50%);
+            border-width: 7px 0 7px 7px;
+            border-style: solid;
+            border-color: transparent transparent transparent rgb(36, 42, 51);
+        }
+
+        .keyword-item-wrapper:hover .kw-floating-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .kw-tooltip-header {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .kw-tooltip-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 6px 9px;
+            color: #68d391;
+            word-break: break-word;
+            margin-bottom: 4px;
+        }
+
+        .kw-tooltip-hint {
+            font-size: 0.70rem;
+            color: #cbd5e0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- Floating FAB button when minimized --- */
+        .floating-fab-btn {
+            background: linear-gradient(135deg, rgb(104, 117, 135), rgb(75, 86, 101));
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            box-shadow: 0 10px 25px rgba(75, 86, 101, 0.45);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .floating-fab-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 14px 30px rgba(75, 86, 101, 0.6);
+            color: #fff;
+        }
+
+        /* --- Global Floating Toast --- */
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1090;
+            pointer-events: none;
+        }
+
+        .custom-toast {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 480px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .suggestion-chip-btn {
+            background: #f1f4f8;
+            color: var(--primary-dark);
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-chip-btn:hover {
+            background: var(--primary-main);
+            color: #fff;
+            border-color: var(--primary-main);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(104, 117, 135, 0.3);
+        }
+
+        .suggestion-chip-btn.active-suggestion {
+            background: var(--primary-main);
+            color: #fff;
+            border-color: var(--primary-main);
+            font-weight: 600;
+            box-shadow: 0 0 0 2px rgba(104, 117, 135, 0.35);
+        }
+
+        /* --- Mode Switcher (Público vs Privado Domínio) --- */
+        .mode-toggle-container {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.28);
+            padding: 3px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-toggle-btn {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #d2dbe5;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .mode-toggle-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .mode-toggle-btn.active-public {
+            background: #198754;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(25, 135, 84, 0.45);
+        }
+
+        .mode-toggle-btn.active-domain {
+            background: #0d6efd;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(13, 110, 253, 0.45);
+        }
+
+        .domain-tag-badge {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.2px;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseSuccess {
+            0% {
+                transform: scale(0.98);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body ng-controller="MainController">
+
+    <!-- Loading Overlay -->
+    <div ng-if="creating"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1080;">
+        <div class="bg-white rounded-4 p-4 d-flex align-items-center gap-3 shadow-lg">
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-6">Criando {{creatingDocName ? '"' + creatingDocName + '"' : 'minuta'}} no Google Docs...</div>
+                <small class="text-muted">Configurando permissões automáticas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Floating Alerts / Toasts -->
+    <div class="custom-toast-container" ng-if="alert.message">
+        <div class="alert alert-{{alert.type}} alert-dismissible fade show custom-toast" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi" ng-class="{
+                    'bi-check-circle-fill text-success fs-5': alert.type === 'success',
+                    'bi-exclamation-triangle-fill text-danger fs-5': alert.type === 'danger',
+                    'bi-info-circle-fill text-info fs-5': alert.type === 'info',
+                    'bi-exclamation-circle-fill text-warning fs-5': alert.type === 'warning'
+                }"></i>
+                <div>{{alert.message}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-2">
+        <!-- Tabs Navigation -->
+        <div class="mx-2 mb-2">
+            <ul class="nav nav-tabs">
+                <li class="nav-item" ng-repeat="tab in tabs">
+                    <a class="nav-link" ng-class="{ active: tab.id === activeTabId }" href="#"
+                        ng-click="selectTab(tab.id)">
+                        <i class="bi bi-file-earmark-text me-1"></i> {{tab.title}}
+                        <i class="bi bi-x-circle close-tab" ng-click="$event.stopPropagation(); removeTab(tab)"
+                            title="Fechar minuta"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-primary fw-bold" href="#" ng-click="addTab()"
+                        ng-class="{ disabled: creating }">
+                        <span ng-if="!creating"><i class="bi bi-plus-lg"></i> Criar Minuta</span>
+                        <span ng-if="creating">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Criando...
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Input Bar & Actions -->
+        <div class="row mx-2 mb-3">
+            <div class="col-md-12 top-bar">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <!-- Seletor de Modo de Compartilhamento (Público / Privado Domínio) -->
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="text-white small fw-bold text-uppercase d-flex align-items-center gap-1">
+                            <i class="bi bi-shield-lock-fill text-warning"></i> Acesso da Minuta:
+                        </span>
+
+                        <div class="mode-toggle-container">
+                            <button type="button" 
+                                    class="mode-toggle-btn" 
+                                    ng-class="{ 'active-public': currentDocPermission.mode === 'public' }"
+                                    ng-click="changeActiveDocSharingMode('public')"
+                                    ng-disabled="updatingPermission || currentDocPermission.loading"
+                                    title="Modo Público: Qualquer pessoa com o link pode visualizar e editar no Google Docs">
+                                <i class="bi bi-globe2"></i>
+                                <span>Público</span>
+                            </button>
+
+                            <button type="button" 
+                                    class="mode-toggle-btn" 
+                                    ng-class="{ 'active-domain': currentDocPermission.mode === 'domain' || currentDocPermission.mode === 'private' }"
+                                    ng-click="changeActiveDocSharingMode('domain')"
+                                    ng-disabled="updatingPermission || currentDocPermission.loading"
+                                    title="Modo Privado: Acesso restrito e exclusivo a usuários do domínio @{{sharingSettings.targetDomain}}">
+                                <i class="bi bi-buildings-fill"></i>
+                                <span>Privado <span class="domain-tag-badge">@{{sharingSettings.targetDomain}}</span></span>
+                            </button>
+                        </div>
+
+                        <button type="button" 
+                                class="btn btn-outline-light btn-sm py-1 px-2" 
+                                ng-click="openSharingConfigModal()" 
+                                title="Configurar domínio autorizado e modo padrão">
+                            <i class="bi bi-gear-fill"></i>
+                        </button>
+
+                        <div ng-if="updatingPermission || currentDocPermission.loading" class="spinner-border spinner-border-sm text-light ms-1" role="status" title="Carregando/Atualizando permissão...">
+                            <span class="visually-hidden">Processando...</span>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Botão de Login Google (Sempre visível para acesso rápido em aba anônima) -->
+                        <button type="button" 
+                                class="btn btn-sm fw-bold shadow-sm d-flex align-items-center gap-2" 
+                                ng-class="{
+                                    'btn-light text-dark border-warning': currentDocPermission.mode === 'domain' || currentDocPermission.mode === 'private',
+                                    'btn-outline-light': currentDocPermission.mode !== 'domain' && currentDocPermission.mode !== 'private'
+                                }"
+                                ng-click="openGoogleLogin()" 
+                                title="Autenticar sua conta institucional @{{sharingSettings.targetDomain}}">
+                            <i class="bi bi-google text-danger"></i>
+                            <span>Entrar com @{{sharingSettings.targetDomain}}</span>
+                        </button>
+
+                        <button class="btn btn-warning btn-sm fw-bold text-dark" type="button" ng-click="downloadPDF()"
+                            title="Exporta e baixa a minuta formatada em PDF">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Baixar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner de Ajuda / Autenticação para Modo Privado -->
+        <div class="row mx-2 mb-2" ng-if="currentDocPermission.mode === 'domain' || currentDocPermission.mode === 'private'">
+            <div class="col-md-12 p-0">
+                <div class="alert alert-info py-2 px-3 m-0 rounded-3 d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm border"
+                     style="background: #e8f4fd; border-color: #b6e0fe !important; color: #084298;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-lock-fill fs-5 text-primary"></i>
+                        <div>
+                            <span class="fw-bold" style="font-size: 0.88rem;">Minuta Privada (Restrita a @{{sharingSettings.targetDomain}})</span>
+                            <small class="text-muted d-block" style="font-size: 0.78rem;">Se o documento não carregar ou solicitar permissão, conecte sua conta Google institucional.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-primary fw-semibold px-3 d-flex align-items-center gap-1" ng-click="openGoogleLogin()">
+                            <i class="bi bi-google"></i> Conectar Conta @{{sharingSettings.targetDomain}}
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" ng-click="refreshIframe()" title="Recarregar minuta">
+                            <i class="bi bi-arrow-clockwise"></i> Recarregar
+                        </button>
+                        <a class="btn btn-sm btn-outline-secondary" ng-href="{{getDocEditUrl()}}" target="_blank" rel="noopener" title="Abrir em aba separada do Google Docs">
+                            <i class="bi bi-box-arrow-up-right"></i> Abrir no Docs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Iframe for Google Doc -->
+        <div class="row mx-2">
+            <div class="col-md-12 p-0">
+                <div class="card shadow-sm border-0 rounded-3 overflow-hidden position-relative">
+                    <iframe class="w-100" ng-src="{{getDocUrl()}}" height="820px" frameborder="0"
+                        allow="clipboard-read; clipboard-write; autoplay"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FLOATING LEGAL DOCK (MENU DE PALAVRAS-CHAVE) -->
+    <!-- ========================================== -->
+    <div class="floating-dock-container">
+        <!-- Minimized Floating Button (FAB) -->
+        <div ng-if="floatingMinimized">
+            <button type="button" class="floating-fab-btn" ng-click="toggleFloating()"
+                title="Clique para abrir as palavras-chave da peça">
+                <i class="bi bi-briefcase-fill text-warning fs-5"></i>
+                <span>Dados da Peça</span>
+                <span class="badge bg-light text-primary rounded-pill">{{keywords.length}}</span>
+            </button>
+        </div>
+
+        <!-- Expanded Floating Card -->
+        <div ng-if="!floatingMinimized" class="floating-dock-card">
+            <!-- Header -->
+            <div class="floating-dock-header">
+                <div class="floating-dock-title">
+                    <i class="bi bi-briefcase-fill text-warning"></i>
+                    <span>Dados da Peça</span>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2" ng-click="openEditModal()"
+                        title="Editar os dados do processo">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2" ng-click="toggleFloating()"
+                        title="Minimizar">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- List of Keywords with Pure Floating Tooltips -->
+            <div class="keywords-grid">
+                <div class="keyword-item-wrapper" ng-repeat="kw in keywords">
+                    <button type="button" class="keyword-item-btn" ng-class="{ 'copied-active': kw.copied }"
+                        ng-click="copyKeyword(kw)">
+                        <div class="kw-label-text">
+                            <i class="bi" ng-class="kw.icon || 'bi-tag-fill'" style="color: #90cdf4;"></i>
+                            <span>{{kw.label}}</span>
+                        </div>
+                        <div class="kw-action-badge">
+                            <span ng-if="!kw.copied"><i class="bi bi-copy"></i> Copiar</span>
+                            <span ng-if="kw.copied" class="fw-bold"><i class="bi bi-check-lg"></i> Copiado!</span>
+                        </div>
+                    </button>
+
+                    <!-- Pure Floating Tooltip (Flutua à esquerda do botão sem alterar a altura do menu) -->
+                    <div class="kw-floating-tooltip">
+                        <div class="kw-tooltip-header">
+                            <i class="bi" ng-class="kw.icon || 'bi-info-circle'"></i> {{kw.label}}
+                        </div>
+                        <div class="kw-tooltip-value">
+                            {{kw.value || '(Vazio)'}}
+                        </div>
+                        <div class="kw-tooltip-hint">
+                            <i class="bi bi-cursor-fill text-warning"></i> Clique no botão para copiar
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE CRIAR NOVA MINUTA COM SUGESTÕES   -->
+    <!-- ========================================== -->
+    <div ng-if="showNewDocModal"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style="background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1095;">
+        <div class="bg-white rounded-4 shadow-lg p-4"
+            style="width: 580px; max-width: 95vw; animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-file-earmark-plus-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="m-0 fw-bold text-dark">Nova Minuta / Peça Jurídica</h5>
+                        <small class="text-muted">Defina o nome da nova aba do editor</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" ng-click="closeNewDocModal()"></button>
+            </div>
+
+            <form ng-submit="confirmCreateDocument()">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-dark">Nome da Peça / Minuta:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-pen-fill text-primary"></i></span>
+                        <input type="text" 
+                               id="newDocNameInput"
+                               class="form-control form-control-lg fs-6" 
+                               placeholder="Ex: Contestação, Mandato, Recurso de Apelação..." 
+                               ng-model="newDocName" 
+                               required 
+                               autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted text-uppercase mb-2 d-flex align-items-center gap-1">
+                        <i class="bi bi-lightbulb-fill text-warning"></i> Sugestões de Peças Frequentes (clique para selecionar):
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" 
+                                class="suggestion-chip-btn" 
+                                ng-class="{ 'active-suggestion': newDocName === sug }"
+                                ng-repeat="sug in legalPieceSuggestions" 
+                                ng-click="selectPieceSuggestion(sug)">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>{{sug}}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <button type="button" class="btn btn-secondary px-3" ng-click="closeNewDocModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="bi bi-plus-circle me-1"></i> Criar Minuta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE EDIÇÃO DOS DADOS DO PROCESSO     -->
+    <!-- ========================================== -->
+    <div ng-if="editingKeywords"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style="background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1095;">
+        <div class="bg-white rounded-4 shadow-lg p-4"
+            style="width: 650px; max-width: 95vw; max-height: 90vh; overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square text-primary fs-4"></i>
+                    <h5 class="m-0 fw-bold">Configurar Dados da Peça Jurídica</h5>
+                </div>
+                <button type="button" class="btn-close" ng-click="closeEditModal()"></button>
+            </div>
+
+            <p class="text-muted small">
+                Preencha os valores reais do processo que está sendo redigido. Esses dados ficarão disponíveis no menu
+                flutuante para você copiar e colar rapidamente.
+            </p>
+
+            <form ng-submit="saveKeywordsForm()">
+                <div class="d-flex flex-column gap-3 mb-3">
+                    <div ng-repeat="item in keywordsForm" class="p-3 border rounded-3 bg-light position-relative">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="fw-bold small text-primary m-0">
+                                <i class="bi" ng-class="item.icon || 'bi-tag-fill'"></i> {{item.label}}
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                                ng-click="removeKeywordField($index)" title="Remover este campo">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <label class="small text-muted">Nome do Campo / Rótulo</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="item.label" required>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="small text-muted">Dado Real (será copiado ao clicar)</label>
+                                <textarea class="form-control form-control-sm" rows="2" ng-model="item.value"
+                                    placeholder="Digite o dado real..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <button type="button" class="btn btn-outline-primary btn-sm" ng-click="addNewKeywordField()">
+                        <i class="bi bi-plus-circle"></i> Adicionar Outro Campo
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm"
+                            ng-click="closeEditModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm fw-bold">Salvar Dados da Peça</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE CONFIGURAÇÃO DE DOMÍNIO E ACESSO -->
+    <!-- ========================================== -->
+    <div ng-if="showSharingConfigModal"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style="background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1095;">
+        <div class="bg-white rounded-4 shadow-lg p-4"
+            style="width: 540px; max-width: 95vw; animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-2 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-shield-check fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="m-0 fw-bold text-dark">Configuração de Domínio e Acesso</h5>
+                        <small class="text-muted">Defina as regras de permissão do Google Drive</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" ng-click="closeSharingConfigModal()"></button>
+            </div>
+
+            <form ng-submit="saveSharingConfig()">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-dark">Domínio Workspace Autorizado:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold text-muted">@</span>
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="ex: procuradoria.rio" 
+                               ng-model="sharingConfigForm.targetDomain" 
+                               required>
+                    </div>
+                    <div class="form-text small text-muted">
+                        Qualquer usuário com conta Google vinculada a este domínio (ex: <code>usuario@procuradoria.rio</code>) terá permissão de edição quando o modo <strong>Privado</strong> estiver ativo.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark">Modo Padrão ao Criar Novas Minutas:</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="defaultSharingMode" id="modeDomain" value="domain" ng-model="sharingConfigForm.defaultMode">
+                            <label class="form-check-label fw-semibold" for="modeDomain">
+                                <i class="bi bi-buildings-fill text-primary"></i> Privado (Domínio)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="defaultSharingMode" id="modePublic" value="public" ng-model="sharingConfigForm.defaultMode">
+                            <label class="form-check-label fw-semibold" for="modePublic">
+                                <i class="bi bi-globe2 text-success"></i> Público
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <button type="button" class="btn btn-secondary px-3" ng-click="closeSharingConfigModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="bi bi-check-lg me-1"></i> Salvar Configurações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE AUTENTICAÇÃO GOOGLE WORKSPACE   -->
+    <!-- ========================================== -->
+    <div ng-if="showAuthModal"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style="background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 1099;">
+        <div class="bg-white rounded-4 shadow-lg p-4 text-center"
+            style="width: 520px; max-width: 95vw; animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div class="d-flex justify-content-end mb-1">
+                <button type="button" class="btn-close" ng-click="closeAuthModal()"></button>
+            </div>
+            
+            <div class="rounded-circle bg-warning bg-opacity-25 p-3 text-warning d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                <i class="bi bi-shield-lock-fill fs-1 text-primary"></i>
+            </div>
+
+            <h4 class="fw-bold text-dark mb-2">Autenticação Necessária</h4>
+            <p class="text-muted small px-3 mb-4">
+                Esta minuta está configurada em <strong>Modo Privado</strong>. O acesso e edição são restritos a usuários autenticados no domínio <strong>@{{sharingSettings.targetDomain}}</strong>.
+            </p>
+
+            <div class="d-grid gap-2 mb-3">
+                <button type="button" class="btn btn-primary btn-lg fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2" ng-click="openGoogleLogin()">
+                    <i class="bi bi-google fs-5"></i>
+                    <span>Fazer Login com @{{sharingSettings.targetDomain}}</span>
+                </button>
+                <a class="btn btn-outline-secondary py-2" ng-href="{{getDocEditUrl()}}" target="_blank" rel="noopener">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir Diretamente no Google Docs
+                </a>
+            </div>
+
+            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                <small class="text-muted">Já efetuou login?</small>
+                <button type="button" class="btn btn-sm btn-outline-success fw-semibold" ng-click="refreshIframe(); closeAuthModal();">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Minuta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
